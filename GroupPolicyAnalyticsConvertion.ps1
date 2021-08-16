@@ -1,4 +1,4 @@
-﻿<#
+<#
 .COPYRIGHT
 Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 See LICENSE in the project root for license information.
@@ -26,10 +26,13 @@ See LICENSE in the project root for license information.
 #############################################################################
 #>
 
+#Prompt the user for the Display Name of the policy to be created
 $displayname = Read-Host -Prompt "Please specify the Display Name for the Policy" 
-$ImportCSVPath = Read-Host -Prompt "Please specify the CSV File Name Exported from Intune Group Policy Analytics"
-#$JSONExport = Read-Host -Prompt "Please specify the Path for the JSON File"
 
+#Prompt the user for the file name of the filw exported from Intune Group Policy Analytics
+$ImportCSVPath = Read-Host -Prompt "Please specify the CSV File Name Exported from Intune Group Policy Analytics"
+
+#CSV will be imported and columns adjutsed to be a compatble to be exported as a JSON
 $data = Import-Csv -path c:\intuneps\$ImportCSVPath | ? 'MDM Support' -like *true* | 
    
    select 'Setting Name','MDM Support','Value','CSP Mapping' | 
@@ -84,8 +87,11 @@ Add-Content C:\intuneps\$displayname.json "`n}"
 
 
 
-######DeviceConfiguration_Import_FromJSON.ps1######
-###################################################
+<#
+This part of the script is part of the https://github.com/microsoftgraph/powershell-intune-samples
+
+.\powershell-intune-samples-master\DeviceConfiguration\DeviceConfiguration_Import_FromJSON.ps1
+#>
 
 function Get-AuthToken {
 
