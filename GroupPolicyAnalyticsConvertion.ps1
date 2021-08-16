@@ -3,7 +3,7 @@
 Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 See LICENSE in the project root for license information.
 #############################################################################
-#                                     			 		                    #
+#                                     			 		                         #
 #   This Sample Code is provided for the purpose of illustration only       #
 #   and is not intended to be used in a production environment.  THIS       #
 #   SAMPLE CODE AND ANY RELATED INFORMATION ARE PROVIDED "AS IS" WITHOUT    #
@@ -19,10 +19,10 @@ See LICENSE in the project root for license information.
 #   Our suppliers from and against any claims or lawsuits, including        #
 #   attorneys' fees, that arise or result from the use or distribution      #
 #   of the Sample Code.                                                     #
-#                                     			 		                    #
+#                                     			 		                         #
 #   Author: John Guy                                                        #
 #   Version 1.0         Date Last modified:      16 August 2020             #
-#                                     			 		                    #
+#                                     			 		                         #
 #############################################################################
 #>
 
