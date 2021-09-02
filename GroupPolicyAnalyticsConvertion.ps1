@@ -3,7 +3,7 @@
 Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 See LICENSE in the project root for license information.
 #############################################################################
-#                                     			 		                         #
+#                                     			 		                    #
 #   This Sample Code is provided for the purpose of illustration only       #
 #   and is not intended to be used in a production environment.  THIS       #
 #   SAMPLE CODE AND ANY RELATED INFORMATION ARE PROVIDED "AS IS" WITHOUT    #
@@ -19,21 +19,22 @@ See LICENSE in the project root for license information.
 #   Our suppliers from and against any claims or lawsuits, including        #
 #   attorneys' fees, that arise or result from the use or distribution      #
 #   of the Sample Code.                                                     #
-#                                     			 		                         #
+#                                     			 		                    #
 #   Author: John Guy                                                        #
-#   Version 1.0         Date Last modified:      16 August 2020             #
-#                                     			 		                         #
+#   Version 1.0         Date Last modified:      2 September 2020           #
+#                                                                           #
+#   Co-Author: Christopher Baxter                                           #
+#   Version 1.1         Date Last modified:      2 September 2021           #
+#                                     			 		                    #
 #############################################################################
 #>
 
-#Prompt the user for the Display Name of the policy to be created
-$displayname = Read-Host -Prompt "Please specify the Display Name for the Policy" 
-
-#Prompt the user for the file name of the filw exported from Intune Group Policy Analytics
-$ImportCSVPath = Read-Host -Prompt "Please specify the CSV File Name Exported from Intune Group Policy Analytics"
+#Get at all .csv files in the c:\intuneps directory and loop through each file
+Get-ChildItem .\*.csv | Foreach-Object {
+  $basename = $_.BaseName
 
 #CSV will be imported and columns adjutsed to be a compatble to be exported as a JSON
-$data = Import-Csv -path c:\intuneps\$ImportCSVPath | ? 'MDM Support' -like *true* | 
+$data = import-csv $_ | ? 'MDM Support' -like *true* | 
    
    select 'Setting Name','MDM Support','Value','CSP Mapping' | 
 
@@ -72,40 +73,29 @@ $format | Export-Csv -NoTypeInformation Temp.csv
 
 import-csv "Temp.csv" | ConvertTo-Json | Add-Content -Path "output.json"
 
-
+#We need to add the below data to the top of the JSON file and because it contains @ symbol we use here-strings to declare blocks of text
 $path = 'output.json'
 $str = @"
 {
     "@odata.type":  "#microsoft.graph.windows10CustomConfiguration",
     "description": null,
-    "displayName": "$displayname",
+    "displayName": "$basename",
     "omaSettings": 
     $((get-content c:\intuneps\output.json) -join "`n") 
 "@
-Set-content C:\intuneps\$displayname.json $str
-Add-Content C:\intuneps\$displayname.json "`n}"
-
-
+#now we add the here-string block of text to the json file
+Set-content C:\intuneps\$basename.json $str
+#now we append the rest of the file to a new line
+Add-Content C:\intuneps\$basename.json "`n}"
 
 <#
 This part of the script is part of the https://github.com/microsoftgraph/powershell-intune-samples
-
 .\powershell-intune-samples-master\DeviceConfiguration\DeviceConfiguration_Import_FromJSON.ps1
+
+This part will prompt you for Azure AD credentials to authenticate and import the JSON file created above
 #>
 
 function Get-AuthToken {
-
-<#
-.SYNOPSIS
-This function is used to authenticate with the Graph API REST interface
-.DESCRIPTION
-The function authenticate with the Graph API Interface with the tenant name
-.EXAMPLE
-Get-AuthToken
-Authenticates you with the Graph API interface
-.NOTES
-NAME: Get-AuthToken
-#>
 
 [cmdletbinding()]
 
@@ -235,18 +225,6 @@ $authority = "https://login.microsoftonline.com/$Tenant"
 
 Function Add-DeviceConfigurationPolicy(){
 
-<#
-.SYNOPSIS
-This function is used to add an device configuration policy using the Graph API REST interface
-.DESCRIPTION
-The function connects to the Graph API Interface and adds a device configuration policy
-.EXAMPLE
-Add-DeviceConfigurationPolicy -JSON $JSON
-Adds a device configuration policy in Intune
-.NOTES
-NAME: Add-DeviceConfigurationPolicy
-#>
-
 [cmdletbinding()]
 
 param
@@ -294,21 +272,9 @@ Write-Verbose "Resource: $DCP_resource"
 
 }
 
-####################################################
+###################TEST JSON FILE#################################
 
 Function Test-JSON(){
-
-<#
-.SYNOPSIS
-This function is used to test if the JSON passed to a REST Post request is valid
-.DESCRIPTION
-The function tests if the JSON passed to the REST Post is valid
-.EXAMPLE
-Test-JSON -JSON $JSON
-Test if the JSON is valid before calling the Graph REST interface
-.NOTES
-NAME: Test-AuthHeader
-#>
 
 param (
 
@@ -393,7 +359,7 @@ $global:authToken = Get-AuthToken -User $User
 
 ####################################################
 
-$ImportPath = "C:\intuneps\$displayname.json"
+$ImportPath = "C:\intuneps\$basename.json"
 
 # Replacing quotes for Test-Path
 $ImportPath = $ImportPath.replace('"','')
@@ -429,3 +395,4 @@ Add-DeviceConfigurationPolicy -JSON $JSON_Output
 #Remove all temp files created
 Remove-Item output.json
 Remove-Item Temp.csv
+}
